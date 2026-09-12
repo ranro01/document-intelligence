@@ -24,19 +24,57 @@ router = APIRouter(
 UPLOAD_DIR = Path(__file__).resolve().parents[3] / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
-ALLOWED_DOCUMENT_TYPES = {
-    "Invoice",
-    "Balance Sheet",
-    "Profit & Loss",
-    "Cash Flow Statement",
+
+# User-facing document types -> internal normalized values
+DOCUMENT_TYPE_MAP = {
+    "invoice": "invoice",
+    "balance sheet": "balance_sheet",
+    "balance_sheet": "balance_sheet",
+    "profit & loss": "profit_and_loss",
+    "profit and loss": "profit_and_loss",
+    "profit_and_loss": "profit_and_loss",
+    "cash flow statement": "cash_flow_statement",
+    "cash_flow_statement": "cash_flow_statement",
+    "cash flow": "cash_flow_statement",
+    "cash_flow": "cash_flow_statement",
 }
+
+
+DISPLAY_DOCUMENT_TYPES = {
+    "invoice": "Invoice",
+    "balance_sheet": "Balance Sheet",
+    "profit_and_loss": "Profit & Loss",
+    "cash_flow_statement": "Cash Flow Statement",
+}
+
+
+# ============================================================
+# Helper: Normalize document type
+# ============================================================
+
+def normalize_document_type(
+    document_type: str,
+) -> str | None:
+    """
+    Convert the incoming document type to the normalized
+    internal value expected by the extraction services.
+    """
+
+    if not document_type:
+        return None
+
+    normalized = document_type.strip().lower()
+
+    return DOCUMENT_TYPE_MAP.get(normalized)
 
 
 # ============================================================
 # Helper: Extract structured data
 # ============================================================
 
-def extract_result_data(processing_result: dict) -> dict:
+def extract_result_data(
+    processing_result: dict,
+) -> dict:
     """
     Extract structured data regardless of whether the result
     came from the primary Qwen extraction or an OCR fallback.
@@ -45,7 +83,10 @@ def extract_result_data(processing_result: dict) -> dict:
     if not isinstance(processing_result, dict):
         return {}
 
-    result = processing_result.get("result", {})
+    result = processing_result.get(
+        "result",
+        {},
+    )
 
     if not isinstance(result, dict):
         return {}
@@ -54,21 +95,37 @@ def extract_result_data(processing_result: dict) -> dict:
     # Primary extraction result
     # --------------------------------------------------------
 
-    extracted_data = result.get("extracted_data")
+    extracted_data = result.get(
+        "extracted_data"
+    )
 
-    if isinstance(extracted_data, dict):
+    if isinstance(
+        extracted_data,
+        dict,
+    ):
         return extracted_data
 
     # --------------------------------------------------------
     # OCR fallback result
     # --------------------------------------------------------
 
-    nested_result = result.get("result")
+    nested_result = result.get(
+        "result"
+    )
 
-    if isinstance(nested_result, dict):
-        extracted_data = nested_result.get("extracted_data")
+    if isinstance(
+        nested_result,
+        dict,
+    ):
 
-        if isinstance(extracted_data, dict):
+        extracted_data = nested_result.get(
+            "extracted_data"
+        )
+
+        if isinstance(
+            extracted_data,
+            dict,
+        ):
             return extracted_data
 
     return {}
@@ -78,39 +135,66 @@ def extract_result_data(processing_result: dict) -> dict:
 # Helper: Extract financial validation
 # ============================================================
 
-def extract_financial_validation(processing_result: dict) -> dict:
+def extract_financial_validation(
+    processing_result: dict,
+) -> dict:
     """
     Extract financial validation from either the primary
     model result or the OCR fallback result.
     """
 
-    if not isinstance(processing_result, dict):
+    if not isinstance(
+        processing_result,
+        dict,
+    ):
         return {}
 
-    result = processing_result.get("result", {})
+    result = processing_result.get(
+        "result",
+        {},
+    )
 
-    if not isinstance(result, dict):
+    if not isinstance(
+        result,
+        dict,
+    ):
         return {}
 
     # --------------------------------------------------------
     # Primary extraction result
     # --------------------------------------------------------
 
-    validation = result.get("financial_validation")
+    validation = result.get(
+        "financial_validation"
+    )
 
-    if isinstance(validation, dict):
+    if isinstance(
+        validation,
+        dict,
+    ):
         return validation
 
     # --------------------------------------------------------
     # OCR fallback result
     # --------------------------------------------------------
 
-    nested_result = result.get("result")
+    nested_result = result.get(
+        "result"
+    )
 
-    if isinstance(nested_result, dict):
-        validation = nested_result.get("financial_validation")
+    if isinstance(
+        nested_result,
+        dict,
+    ):
 
-        if isinstance(validation, dict):
+        validation = nested_result.get(
+            "financial_validation"
+        )
+
+        if isinstance(
+            validation,
+            dict,
+        ):
             return validation
 
     return {}
@@ -131,7 +215,9 @@ def list_documents(
 
     documents = (
         db.query(Document)
-        .order_by(Document.created_at.desc())
+        .order_by(
+            Document.created_at.desc()
+        )
         .all()
     )
 
@@ -148,6 +234,7 @@ def list_documents(
         if document.extracted_data:
 
             try:
+
                 stored_data = json.loads(
                     document.extracted_data
                 )
@@ -155,7 +242,8 @@ def list_documents(
             except json.JSONDecodeError:
 
                 stored_data = {
-                    "extracted_data": document.extracted_data
+                    "extracted_data":
+                        document.extracted_data
                 }
 
         # ----------------------------------------------------
@@ -163,10 +251,17 @@ def list_documents(
         # ----------------------------------------------------
 
         if (
-            isinstance(stored_data, dict)
-            and "document_name" in stored_data
+            isinstance(
+                stored_data,
+                dict,
+            )
+            and "document_name"
+            in stored_data
         ):
-            results.append(stored_data)
+
+            results.append(
+                stored_data
+            )
 
         # ----------------------------------------------------
         # Backward compatibility for older DB records
@@ -176,13 +271,17 @@ def list_documents(
 
             results.append(
                 {
-                    "document_name": document.filename,
+                    "document_name":
+                        document.filename,
+
                     "processing_status": (
                         document.status.upper()
                         if document.status
                         else "UNKNOWN"
                     ),
-                    "extracted_data": stored_data,
+
+                    "extracted_data":
+                        stored_data,
                 }
             )
 
@@ -221,6 +320,7 @@ def get_document(
     # --------------------------------------------------------
 
     if not document:
+
         return {
             "error": "Document not found"
         }
@@ -237,7 +337,10 @@ def get_document(
                 document.extracted_data
             )
 
-            if isinstance(stored_data, dict):
+            if isinstance(
+                stored_data,
+                dict,
+            ):
                 return stored_data
 
         except json.JSONDecodeError:
@@ -248,15 +351,21 @@ def get_document(
     # --------------------------------------------------------
 
     return {
-        "document_name": document.filename,
+        "document_name":
+            document.filename,
+
         "processing_status": (
             document.status.upper()
             if document.status
             else "UNKNOWN"
         ),
+
         "extracted_data": {},
+
         "validation": {},
+
         "file_validation": {},
+
         "processing_metadata": {},
     }
 
@@ -276,6 +385,7 @@ async def process_document_api(
     financial document.
 
     Supported document types:
+
         - Invoice
         - Balance Sheet
         - Profit & Loss
@@ -292,23 +402,40 @@ async def process_document_api(
 
 
     # ========================================================
-    # 2. Validate document type
+    # 2. Normalize document type
     # ========================================================
 
-    if document_type not in ALLOWED_DOCUMENT_TYPES:
+    normalized_document_type = (
+        normalize_document_type(
+            document_type
+        )
+    )
+
+
+    # ========================================================
+    # 3. Validate document type
+    # ========================================================
+
+    if normalized_document_type is None:
 
         return {
-            "document_name": safe_filename,
-            "document_type": document_type,
-            "processing_status": "FAILED",
+            "document_name":
+                safe_filename,
+
+            "document_type":
+                document_type,
+
+            "processing_status":
+                "FAILED",
 
             "file_validation": {
                 "status": "FAILED",
+
                 "error": (
                     f"Unsupported document type: "
                     f"{document_type}. "
                     f"Allowed types: "
-                    f"{sorted(ALLOWED_DOCUMENT_TYPES)}"
+                    f"{list(DISPLAY_DOCUMENT_TYPES.values())}"
                 ),
             },
 
@@ -321,29 +448,42 @@ async def process_document_api(
 
 
     # ========================================================
-    # 3. Save uploaded file
+    # 4. Save uploaded file
     # ========================================================
 
-    file_path = UPLOAD_DIR / safe_filename
+    file_path = (
+        UPLOAD_DIR / safe_filename
+    )
 
     try:
 
         contents = await file.read()
 
-        with open(file_path, "wb") as buffer:
+        with open(
+            file_path,
+            "wb",
+        ) as buffer:
+
             buffer.write(contents)
 
     except Exception as exc:
 
         return {
-            "document_name": safe_filename,
-            "document_type": document_type,
-            "processing_status": "FAILED",
+            "document_name":
+                safe_filename,
+
+            "document_type":
+                normalized_document_type,
+
+            "processing_status":
+                "FAILED",
 
             "file_validation": {
                 "status": "FAILED",
+
                 "error": (
-                    f"Could not save uploaded file: {exc}"
+                    f"Could not save uploaded file: "
+                    f"{exc}"
                 ),
             },
 
@@ -356,45 +496,57 @@ async def process_document_api(
 
 
     # ========================================================
-    # 4. Validate file
+    # 5. Validate file
     # ========================================================
 
     try:
 
-        validation_result = validate_document(
-            str(file_path)
+        validation_result = (
+            validate_document(
+                str(file_path)
+            )
         )
 
     except Exception as exc:
 
         validation_result = {
             "status": "FAILED",
+
             "error": (
-                f"Document validation failed: {exc}"
+                f"Document validation failed: "
+                f"{exc}"
             ),
         }
 
 
     # ========================================================
-    # 5. Create DB record
+    # 6. Create DB record
     # ========================================================
 
     try:
 
-        document = DocumentRepository.create(
-            db=db,
-            filename=safe_filename,
-            file_path=str(file_path),
+        document = (
+            DocumentRepository.create(
+                db=db,
+                filename=safe_filename,
+                file_path=str(file_path),
+            )
         )
 
     except Exception as exc:
 
         return {
-            "document_name": safe_filename,
-            "document_type": document_type,
-            "processing_status": "FAILED",
+            "document_name":
+                safe_filename,
 
-            "file_validation": validation_result,
+            "document_type":
+                normalized_document_type,
+
+            "processing_status":
+                "FAILED",
+
+            "file_validation":
+                validation_result,
 
             "extracted_data": {},
 
@@ -402,18 +554,21 @@ async def process_document_api(
 
             "processing_metadata": {
                 "error": (
-                    f"Database record creation failed: "
-                    f"{exc}"
+                    "Database record creation "
+                    f"failed: {exc}"
                 ),
             },
         }
 
 
     # ========================================================
-    # 6. Stop if file validation failed
+    # 7. Stop if file validation failed
     # ========================================================
 
-    if validation_result.get("status") != "PASS":
+    if (
+        validation_result.get("status")
+        != "PASS"
+    ):
 
         DocumentRepository.update_status(
             db=db,
@@ -422,11 +577,17 @@ async def process_document_api(
         )
 
         response = {
-            "document_name": safe_filename,
-            "document_type": document_type,
-            "processing_status": "FAILED",
+            "document_name":
+                safe_filename,
 
-            "file_validation": validation_result,
+            "document_type":
+                normalized_document_type,
+
+            "processing_status":
+                "FAILED",
+
+            "file_validation":
+                validation_result,
 
             "extracted_data": {},
 
@@ -434,8 +595,12 @@ async def process_document_api(
 
             "processing_metadata": {
                 "provider": None,
-                "fallback_used": False,
-                "content_type": file.content_type,
+
+                "fallback_used":
+                    False,
+
+                "content_type":
+                    file.content_type,
             },
         }
 
@@ -449,14 +614,16 @@ async def process_document_api(
 
 
     # ========================================================
-    # 7. AI / OCR document processing
+    # 8. AI / OCR document processing
     # ========================================================
 
     try:
 
-        processing_result = process_document(
-            str(file_path),
-            document_type,
+        processing_result = (
+            process_document(
+                str(file_path),
+                normalized_document_type,
+            )
         )
 
     except Exception as exc:
@@ -468,11 +635,17 @@ async def process_document_api(
         )
 
         response = {
-            "document_name": safe_filename,
-            "document_type": document_type,
-            "processing_status": "FAILED",
+            "document_name":
+                safe_filename,
 
-            "file_validation": validation_result,
+            "document_type":
+                normalized_document_type,
+
+            "processing_status":
+                "FAILED",
+
+            "file_validation":
+                validation_result,
 
             "extracted_data": {},
 
@@ -480,9 +653,15 @@ async def process_document_api(
 
             "processing_metadata": {
                 "provider": None,
-                "fallback_used": False,
-                "error": str(exc),
-                "content_type": file.content_type,
+
+                "fallback_used":
+                    False,
+
+                "error":
+                    str(exc),
+
+                "content_type":
+                    file.content_type,
             },
         }
 
@@ -496,10 +675,13 @@ async def process_document_api(
 
 
     # ========================================================
-    # 8. Primary + fallback processing failed
+    # 9. Primary + fallback processing failed
     # ========================================================
 
-    if processing_result.get("status") != "SUCCESS":
+    if (
+        processing_result.get("status")
+        != "SUCCESS"
+    ):
 
         DocumentRepository.update_status(
             db=db,
@@ -508,35 +690,46 @@ async def process_document_api(
         )
 
         response = {
-            "document_name": safe_filename,
-            "document_type": document_type,
-            "processing_status": "FAILED",
+            "document_name":
+                safe_filename,
 
-            "file_validation": validation_result,
+            "document_type":
+                normalized_document_type,
+
+            "processing_status":
+                "FAILED",
+
+            "file_validation":
+                validation_result,
 
             "extracted_data": {},
 
             "validation": {},
 
             "processing_metadata": {
-                "provider": processing_result.get(
-                    "provider"
-                ),
+                "provider":
+                    processing_result.get(
+                        "provider"
+                    ),
 
-                "fallback_used": processing_result.get(
-                    "fallback_used",
-                    False,
-                ),
+                "fallback_used":
+                    processing_result.get(
+                        "fallback_used",
+                        False,
+                    ),
 
-                "primary_error": processing_result.get(
-                    "primary_error"
-                ),
+                "primary_error":
+                    processing_result.get(
+                        "primary_error"
+                    ),
 
-                "ocr_fallback_error": processing_result.get(
-                    "ocr_fallback_error"
-                ),
+                "ocr_fallback_error":
+                    processing_result.get(
+                        "ocr_fallback_error"
+                    ),
 
-                "content_type": file.content_type,
+                "content_type":
+                    file.content_type,
             },
         }
 
@@ -550,25 +743,29 @@ async def process_document_api(
 
 
     # ========================================================
-    # 9. Extract structured result
+    # 10. Extract structured result
     # ========================================================
 
-    extracted_data = extract_result_data(
-        processing_result
+    extracted_data = (
+        extract_result_data(
+            processing_result
+        )
     )
 
 
     # ========================================================
-    # 10. Extract financial validation
+    # 11. Extract financial validation
     # ========================================================
 
-    financial_validation = extract_financial_validation(
-        processing_result
+    financial_validation = (
+        extract_financial_validation(
+            processing_result
+        )
     )
 
 
     # ========================================================
-    # 11. Determine validation status
+    # 12. Determine validation status
     # ========================================================
 
     validation_status = None
@@ -578,24 +775,15 @@ async def process_document_api(
         dict,
     ):
 
-        validation_status = financial_validation.get(
-            "overall_status"
+        validation_status = (
+            financial_validation.get(
+                "overall_status"
+            )
         )
 
 
     # ========================================================
-    # 12. Determine final processing status
-    #
-    # IMPORTANT:
-    #
-    # NOT_APPLICABLE does NOT mean PASS.
-    #
-    # It means the particular financial validation could
-    # not be performed because the required source fields
-    # were not present.
-    #
-    # Only an actual FAILED validation makes the document
-    # processing status FAILED here.
+    # 13. Determine final processing status
     # ========================================================
 
     if validation_status == "FAILED":
@@ -604,26 +792,15 @@ async def process_document_api(
 
     elif not extracted_data:
 
-        # Extraction succeeded technically, but returned
-        # no structured information at all.
         final_status = "FAILED"
 
     else:
 
-        # This includes:
-        #
-        #   PASS
-        #   NOT_APPLICABLE
-        #   missing overall validation object
-        #
-        # NOT_APPLICABLE itself is NOT converted into PASS.
-        # The processing status simply remains successful
-        # because there was no failed validation.
         final_status = "PASS"
 
 
     # ========================================================
-    # 13. Update DB status
+    # 14. Update DB status
     # ========================================================
 
     db_status = (
@@ -640,39 +817,48 @@ async def process_document_api(
 
 
     # ========================================================
-    # 14. Build final structured API response
+    # 15. Build final API response
     # ========================================================
 
     response = {
-        "document_name": safe_filename,
+        "document_name":
+            safe_filename,
 
-        "document_type": document_type,
+        "document_type":
+            normalized_document_type,
 
-        "processing_status": final_status,
+        "processing_status":
+            final_status,
 
-        "file_validation": validation_result,
+        "file_validation":
+            validation_result,
 
-        "extracted_data": extracted_data,
+        "extracted_data":
+            extracted_data,
 
-        "validation": financial_validation,
+        "validation":
+            financial_validation,
 
         "processing_metadata": {
-            "provider": processing_result.get(
-                "provider"
-            ),
+            "provider":
+                processing_result.get(
+                    "provider"
+                ),
 
-            "fallback_used": processing_result.get(
-                "fallback_used",
-                False,
-            ),
+            "fallback_used":
+                processing_result.get(
+                    "fallback_used",
+                    False,
+                ),
 
-            "content_type": file.content_type,
+            "content_type":
+                file.content_type,
         },
     }
 
 
     # ========================================================
-    # 15. Persist complete structured response
+    # 16. Persist complete response
     # ========================================================
 
     DocumentRepository.update_extracted_data(
@@ -683,7 +869,7 @@ async def process_document_api(
 
 
     # ========================================================
-    # 16. Return response
+    # 17. Return response
     # ========================================================
 
     return response
