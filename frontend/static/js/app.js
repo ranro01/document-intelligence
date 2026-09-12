@@ -161,8 +161,6 @@ function updateScrollAnimation() {
         hero?.offsetHeight || 1;
 
 
-    // Move the horse subtly.
-
     if (heroImage) {
 
         const offset =
@@ -183,8 +181,6 @@ function updateScrollAnimation() {
              translate3d(0, ${offset}px, 0)`;
     }
 
-
-    // Update vertical progress indicator.
 
     if (paginationProgress) {
 
@@ -322,12 +318,6 @@ async function loadDocuments() {
             await response.json();
 
 
-        /*
-         * Your API returns an array for this endpoint.
-         * This also handles a wrapped {documents: []}
-         * response if the route changes later.
-         */
-
         const documents =
             Array.isArray(data)
                 ? data
@@ -355,31 +345,40 @@ async function loadDocuments() {
         documentsTableBody.innerHTML = "";
 
 
-        documents.forEach(document => {
+        // IMPORTANT:
+        // Use "doc" for each database record.
+        // This prevents shadowing the browser's
+        // global "document" object.
+
+        documents.forEach(doc => {
 
             const row =
                 document.createElement("tr");
 
 
             const status =
-                document.processing_status ||
-                document.status ||
+                doc.processing_status ||
+                doc.status ||
                 "UNKNOWN";
+
+
+            const filename =
+                doc.document_name ||
+                doc.filename ||
+                "";
 
 
             row.innerHTML = `
 
                 <td>
                     ${escapeHtml(
-                        document.document_name ||
-                        document.filename ||
-                        "-"
+                        filename || "-"
                     )}
                 </td>
 
                 <td>
                     ${escapeHtml(
-                        document.document_type ||
+                        doc.document_type ||
                         "-"
                     )}
                 </td>
@@ -400,9 +399,7 @@ async function loadDocuments() {
                         type="button"
                         class="view-button"
                         data-document="${escapeHtml(
-                            document.document_name ||
-                            document.filename ||
-                            ""
+                            filename
                         )}"
                     >
                         VIEW →
@@ -755,9 +752,6 @@ function renderFields(extractedData) {
         });
 
 
-    // Add top-level metadata only when it
-    // wasn't already represented.
-
     if (
         extractedData.document_type &&
         !fields.document_type
@@ -1057,7 +1051,6 @@ function renderValidation(validation) {
 
             <div class="validation-check-header">
 
-
                 <div>
 
                     <div class="validation-check-name">
@@ -1095,7 +1088,6 @@ function renderValidation(validation) {
 
 
             <div class="validation-values">
-
 
                 <div>
 
@@ -1163,7 +1155,6 @@ function renderValidation(validation) {
                     </strong>
 
                 </div>
-
 
             </div>
 
