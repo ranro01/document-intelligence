@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Neostats — Financial Document Intelligence</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/css/style.css"
+    >
+
+</head>
+
+
+<body>
+
+    <!-- =====================================================
+         BACKGROUND
+    ====================================================== -->
+
+    <div class="grid-background"></div>
+
+
+    <!-- =====================================================
+         NAVIGATION
+    ====================================================== -->
+
+    <header class="navbar">
+
+        <a href="/" class="logo">
+            Neostats
+        </a>
+
+
+        <div class="tagline">
+
+            <span class="dot"></span>
+
+            <span>
+                DATA FOR A MORE OPEN TOMORROW
+            </span>
+
+        </div>
+
+
+        <nav class="nav-links">
+
+            <a href="#home">
+                <span class="nav-dot"></span>
+                HOME
+            </a>
+
+            <a href="#documents">
+                DOCUMENTS
+            </a>
+
+            <a href="#about">
+                ABOUT
+            </a>
+
+        </nav>
+
+
+        <div class="nav-right">
+
+            <span class="nav-dot"></span>
+
+            BUILT FOR WHAT'S NEXT
+
+        </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <main id="home">
+
+
+        <!-- =================================================
+             HERO
+        ================================================== -->
+
+        <section class="hero">
+
+
+            <!-- LEFT SIDE -->
+
+            <div class="hero-copy">
+
+                <div class="hero-number">
+                    01
+                </div>
+
+
+                <h1>
+
+                    Turn documents
+
+                    <br>
+
+                    into
+
+                    <span class="accent">
+                        decisions.
+                    </span>
+
+                </h1>
+
+
+                <p class="hero-subtitle">
+
+                    EXTRACT.
+                    VALIDATE.
+                    UNDERSTAND.
+
+                </p>
+
+
+                <div class="hero-description">
+
+                    <div class="small-line"></div>
+
+                    <p>
+                        Financial intelligence<br>
+                        for a clearer tomorrow.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- RIGHT SIDE -->
+
+            <div
+                class="hero-visual"
+                id="heroVisual"
+            >
+
+                <div
+                    class="hero-image-wrapper"
+                    id="heroImageWrapper"
+                >
+
+                    <img
+                        src="/static/images/horse.jpg"
+                        alt="Horse running across a landscape"
+                        class="hero-image"
+                        id="heroImage"
+                    >
+
+                </div>
+
+
+                <div class="image-overlay"></div>
+
+
+                <div class="hero-side-label">
+
+                    <span>
+                        SIMPLE
+                    </span>
+
+                    <span>
+                        USEFUL
+                    </span>
+
+                    <span>
+                        BEAUTIFUL
+                    </span>
+
+                    <span>
+                        INTELLIGENCE
+                    </span>
+
+                </div>
+
+
+                <div class="hero-pagination">
+
+                    <span>
+                        01
+                    </span>
+
+                    <div class="pagination-line">
+
+                        <div
+                            class="pagination-progress"
+                            id="paginationProgress"
+                        ></div>
+
+                    </div>
+
+                    <span>
+                        03
+                    </span>
+
+                </div>
+
+
+                <div class="image-credit">
+
+                    <div class="small-line"></div>
+
+                    <span>
+                        NEOSTATS
+                    </span>
+
+                    <span>
+                        2026
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             DOCUMENT WORKSPACE
+        ================================================== -->
+
+        <section
+            class="workspace"
+            id="documents"
+        >
+
+
+            <!-- =================================================
+                 UPLOAD CARD
+            ================================================== -->
+
+            <section class="upload-card">
+
+                <div class="section-label">
+                    02 / PROCESS DOCUMENT
+                </div>
+
+
+                <div class="card-top">
+
+                    <h2>
+                        Upload a financial document.
+                    </h2>
+
+                    <span class="file-note">
+
+                        PDF, JPG, PNG
+                        <br>
+                        MAX 10MB
+
+                    </span>
+
+                </div>
+
+
+                <div class="form-area">
+
+
+                    <!-- DOCUMENT TYPE -->
+
+                    <div class="form-group">
+
+                        <label for="documentType">
+                            DOCUMENT TYPE
+                        </label>
+
+
+                        <select id="documentType">
+
+                            <option value="Invoice">
+                                Invoice
+                            </option>
+
+                            <option value="Balance Sheet">
+                                Balance Sheet
+                            </option>
+
+                            <option value="Profit & Loss">
+                                Profit & Loss
+                            </option>
+
+                            <option value="Cash Flow Statement">
+                                Cash Flow Statement
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- FILE -->
+
+                    <div class="form-group">
+
+                        <label for="fileInput">
+                            DOCUMENT
+                        </label>
+
+
+                        <input
+                            type="file"
+                            id="fileInput"
+                            accept=".pdf,.jpg,.jpeg,.png"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    id="processButton"
+                    class="process-button"
+                    type="button"
+                >
+
+                    <span>
+                        PROCESS DOCUMENT
+                    </span>
+
+                    <span class="button-arrow">
+                        →
+                    </span>
+
+                </button>
+
+
+                <div
+                    id="uploadMessage"
+                    class="message hidden"
+                ></div>
+
+            </section>
+
+
+            <!-- =================================================
+                 DOCUMENT HISTORY
+            ================================================== -->
+
+            <section class="history-card">
+
+                <div class="section-label">
+                    03 / DOCUMENT HISTORY
+                </div>
+
+
+                <div class="card-top">
+
+                    <h2>
+                        Processed documents.
+                    </h2>
+
+
+                    <button
+                        id="refreshButton"
+                        class="refresh-button"
+                        type="button"
+                    >
+
+                        <span class="refresh-icon">
+                            ↻
+                        </span>
+
+                        REFRESH
+
+                    </button>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    DOCUMENT
+                                </th>
+
+                                <th>
+                                    TYPE
+                                </th>
+
+                                <th>
+                                    STATUS
+                                </th>
+
+                                <th>
+                                    ACTION
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="documentsTableBody">
+
+                            <tr>
+
+                                <td
+                                    colspan="4"
+                                    class="empty"
+                                >
+                                    Loading documents...
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+        </section>
+
+
+        <!-- =================================================
+             EXTRACTION RESULT
+        ================================================== -->
+
+        <section
+            id="resultSection"
+            class="result-section hidden"
+        >
+
+
+            <!-- RESULT HEADER -->
+
+            <div class="section-label">
+                04 / EXTRACTION RESULT
+            </div>
+
+
+            <div class="result-heading">
+
+
+                <div>
+
+                    <div class="hero-number">
+                        RESULT
+                    </div>
+
+                    <h2 id="resultTitle">
+                        Document Result
+                    </h2>
+
+                </div>
+
+
+                <div id="resultStatus"></div>
+
+            </div>
+
+
+            <!-- =================================================
+                 EXTRACTED FIELDS
+            ================================================== -->
+
+            <div class="result-block">
+
+                <div class="result-block-label">
+                    EXTRACTED FIELDS
+                </div>
+
+
+                <div
+                    id="fieldsContainer"
+                    class="fields-grid"
+                ></div>
+
+            </div>
+
+
+            <!-- =================================================
+                 LINE ITEMS
+            ================================================== -->
+
+            <div
+                id="lineItemsSection"
+                class="result-block hidden"
+            >
+
+                <div class="result-block-label">
+                    LINE ITEMS
+                </div>
+
+
+                <div
+                    id="lineItemsContainer"
+                    class="line-items-container"
+                ></div>
+
+            </div>
+
+
+            <!-- =================================================
+                 FINANCIAL VALIDATION
+            ================================================== -->
+
+            <div
+                id="validationSection"
+                class="result-block hidden"
+            >
+
+                <div class="result-block-label">
+                    FINANCIAL VALIDATION
+                </div>
+
+
+                <div
+                    id="validationSummary"
+                    class="validation-summary"
+                ></div>
+
+
+                <div
+                    id="validationChecks"
+                    class="validation-checks"
+                ></div>
+
+            </div>
+
+
+            <!-- =================================================
+                 PROCESSING INFORMATION
+            ================================================== -->
+
+            <div
+                id="processingSection"
+                class="result-block hidden"
+            >
+
+                <div class="result-block-label">
+                    PROCESSING
+                </div>
+
+
+                <div
+                    id="processingInfo"
+                    class="processing-info"
+                ></div>
+
+            </div>
+
+
+            <!-- =================================================
+                 RAW JSON
+            ================================================== -->
+
+            <div
+                id="rawJsonSection"
+                class="result-block"
+            >
+
+                <div class="result-block-label">
+                    RAW JSON
+                </div>
+
+
+                <details class="json-details">
+
+                    <summary>
+
+                        VIEW STRUCTURED RESPONSE
+
+                        <span>
+                            +
+                        </span>
+
+                    </summary>
+
+
+                    <pre id="rawJson"></pre>
+
+                </details>
+
+            </div>
+
+
+        </section>
+
+
+        <!-- =================================================
+             ABOUT
+        ================================================== -->
+
+        <section
+            class="about-section"
+            id="about"
+        >
+
+            <div class="section-label">
+                ABOUT NEOSTATS
+            </div>
+
+
+            <div class="about-content">
+
+                <h2>
+
+                    Intelligence that makes
+
+                    <span class="accent">
+                        information useful.
+                    </span>
+
+                </h2>
+
+
+                <p>
+
+                    In Neostats, We transforms financial documents
+                    into structured, validated information 
+                    and dreams to reality.
+
+                </p>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+
+    <footer>
+
+        <span>
+            CREATED BY RAMAKRISHNA L
+        </span>
+
+
+        <span>
+            INTELLIGENCE MOVES FORWARD
+        </span>
+
+    </footer>
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ====================================================== -->
+
+    <script src="/static/js/app.js"></script>
+
+</body>
+
+</html>
