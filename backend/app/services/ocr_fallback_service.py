@@ -1,7 +1,6 @@
 import re
 
 from app.services.ocr_space_service import extract_with_ocr_space
-from app.services.doctr_ocr_service import extract_with_doctr
 
 
 # =========================================================
@@ -2519,12 +2518,21 @@ def extract_with_ocr_fallback(
     # 2. DOCTR
     # =====================================================
 
-    doctr_result = (
-        extract_with_doctr(
+    try:
+        from app.services.doctr_ocr_service import (
+            extract_with_doctr
+        )
+
+        doctr_result = extract_with_doctr(
             file_path
         )
-    )
 
+    except Exception as exc:
+        doctr_result = {
+            "status": "FAILED",
+            "error": str(exc),
+        }
+    
     if (
         doctr_result["status"]
         == "SUCCESS"
